@@ -18,22 +18,72 @@ class Blockchain {
     // you will need to set this up statically or instead you can verify if the height !== 0 then you
     // will not create the genesis block
     generateGenesisBlock(){
-        // Add your code here
+        let self = this;
+        let block = new Block('Genesis block');
+        block.time = new Date().getTime().toString().slice(0,-3);
+        block.hash = SHA256(JSON.stringify(newBlock)).toString();
+        self.db.addLevelDBData(block.height, block)
+        .then(value => {
+            console.log(`New block added: ${value.toString()}`)
+        })
+        .catch(err => {
+            console.log(`${err.message}`)
+        })
     }
 
     // Get block height, it is auxiliar method that return the height of the blockchain
     getBlockHeight() {
-        // Add your code here
+        let self = this;
+        return new Promise((resolve, reject) => {
+            self.db.getBlocksCount().then(currentLength => {
+                resolve(currentLength);
+            }).catch(err => {
+                reject(new Error(`${err.message}`));
+            });
+        });
     }
 
     // Add new block
     addBlock(block) {
+        let self = this;
+        block.time = new Date().getTime().toString().slice(0,-3);
+        return new Promise((resolve, reject) => {
+            self.db.getBlocksCount()
+            .then(length => {
+                block.height = length;
+                self.db.getLevelDBData(length -1)
+                .then(previousBlock => {
+                    block.previousBlockHash = previousBlock.hash;
+                    block.hash = SHA256(JSON.stringify(newBlock)).toString();
+                    self.db.addLevelDBData(block.height, block)
+                    .then(value => {
+                        console.log(`New block added: ${value.toString()}`)
+                    })
+                    .catch(err => {
+                        console.log(`${err.message}`)
+                    })
+                })
+                .catch(err => console.log(err))
+            })
+            .catch( err => {
+                console.log(`${err.message}`)
+            })
+        })
+        
+
         // Add your code here
     }
 
     // Get Block By Height
     getBlock(height) {
         // Add your code here
+        return new Promise((resolve, reject) => {
+            this.chain.getBlock(blockHeight).then(block => {
+                resolve(block);
+            }).catch(err => {
+                reject(new Error(`${err.message}`));
+            });
+});
     }
 
     // Validate if Block is being tampered by Block Height
@@ -56,7 +106,7 @@ class Blockchain {
             }).catch((err) => { console.log(err); reject(err)});
         });
     }
-   
+
 }
 
 module.exports.Blockchain = Blockchain;
