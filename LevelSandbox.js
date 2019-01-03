@@ -19,7 +19,7 @@ class LevelSandbox {
                 if (err) {
                     reject(err)
                 }
-                resolve(value)
+                resolve(JSON.parse(value))
             })
         });
     }
@@ -28,7 +28,7 @@ class LevelSandbox {
     addLevelDBData(key, value) {
         let self = this;
         return new Promise(function(resolve, reject) {
-            self.db.put(key, value, function(err) {
+            self.db.put(key, JSON.stringify(value), function(err) {
                 if (err) {
                     reject(err);
                 }
@@ -42,16 +42,15 @@ class LevelSandbox {
     getBlocksCount() {
         let self = this;
         return new Promise(function(resolve, reject){
-            let i = -1;
+            let length = 0;
             self.db.createReadStream().on('data', function(data) {
-                i++;
+                length++;
             }).on('error', function(err) {
                 console.log('Error: ' + err);
                 reject(err);
             }).on('close', function() {
-                resolve(i);
+                resolve(length);
             });
-            // Add your code here, remember un Promises you need to resolve() or reject()
         });
     }
 }
