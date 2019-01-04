@@ -19,25 +19,29 @@ class Blockchain {
     // will not create the genesis block
     generateGenesisBlock(){
         let self = this;
-        let block = new Block('Genesis block');
-        block.time = new Date().getTime().toString().slice(0,-3);
-        block.hash = SHA256(JSON.stringify(newBlock)).toString();
-        self.db.addLevelDBData(block.height, block)
-        .then(value => {
-            console.log(`New block added: ${value.toString()}`)
-        })
-        .catch(err => {
-            console.log(`${err.message}`)
-        })
+        return new Promise((resolve, reject) => {
+            let block = new Block.Block('Genesis block');
+            block.time = new Date().getTime().toString().slice(0,-3);
+            block.hash = SHA256(JSON.stringify(block)).toString();
+            self.bd.addLevelDBData(block.height, block)
+            .then(value => {
+                console.log(value)
+                resolve(value)
+            })
+            .catch(err => {
+                reject(err.message)
+            });
+        });
     }
 
     // Get block height, it is auxiliar method that return the height of the blockchain
     getBlockHeight() {
         let self = this;
         return new Promise((resolve, reject) => {
-            self.db.getBlocksCount().then(currentLength => {
+            self.bd.getBlocksCount().then(currentLength => {
                 resolve(currentLength);
-            }).catch(err => {
+            })
+            .catch(err => {
                 reject(new Error(`${err.message}`));
             });
         });
@@ -48,35 +52,34 @@ class Blockchain {
         let self = this;
         block.time = new Date().getTime().toString().slice(0,-3);
         return new Promise((resolve, reject) => {
-            self.db.getBlocksCount()
+            self.bd.getBlocksCount()
             .then(length => {
                 block.height = length;
-                self.db.getLevelDBData(length -1)
+                self.bd.getLevelDBData(length -1)
                 .then(previousBlock => {
                     block.previousBlockHash = previousBlock.hash;
-                    block.hash = SHA256(JSON.stringify(newBlock)).toString();
-                    self.db.addLevelDBData(block.height, block)
+                    block.hash = SHA256(JSON.stringify(block)).toString();
+                    self.bd.addLevelDBData(block.height, block)
                     .then(value => {
-                        console.log(`New block added: ${value.toString()}`)
+                        resolve(value)
                     })
                     .catch(err => {
-                        console.log(`${err.message}`)
+                        reject(err)
                     })
                 })
-                .catch(err => console.log(err))
+                .catch(err => {
+                    reject(err.message)
+                })
             })
             .catch( err => {
-                console.log(`${err.message}`)
-            })
-        })
-        
-
-        // Add your code here
+                reject(err.message)
+            });
+        });
     }
 
     // Get Block By Height
     getBlock(height) {
-        // Add your code here
+        let self = this;
         return new Promise((resolve, reject) => {
             this.chain.getBlock(blockHeight).then(block => {
                 resolve(block);

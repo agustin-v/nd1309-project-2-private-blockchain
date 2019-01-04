@@ -41,14 +41,17 @@ class LevelSandbox {
     // Method that return the height
     getBlocksCount() {
         let self = this;
-        return new Promise(function(resolve, reject){
+        return new Promise((resolve, reject) => {
             let length = 0;
-            self.db.createReadStream().on('data', function(data) {
+            self.db.createReadStream()
+            .on('data', (data) => {
                 length++;
-            }).on('error', function(err) {
+            })
+            .on('error', (err) => {
                 console.log('Error: ' + err);
                 reject(err);
-            }).on('close', function() {
+            })
+            .on('close', () => {
                 resolve(length);
             });
         });
