@@ -81,12 +81,14 @@ class Blockchain {
     getBlock(height) {
         let self = this;
         return new Promise((resolve, reject) => {
-            this.chain.getBlock(blockHeight).then(block => {
+            self.bd.getLevelDBData(height)
+            .then(block => {
                 resolve(block);
-            }).catch(err => {
+            })
+            .catch(err => {
                 reject(new Error(`${err.message}`));
             });
-});
+        });
     }
 
     // Validate if Block is being tampered by Block Height
