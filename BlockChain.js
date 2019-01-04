@@ -93,7 +93,21 @@ class Blockchain {
 
     // Validate if Block is being tampered by Block Height
     validateBlock(height) {
-        // Add your code here
+        let self = this;
+        return Promise((resolve, reject) => {
+            self.bd.getLevelDBData(height)
+            .then((block => {
+                let blockHash = block.hash;
+                block.hash = '';
+                let validBlockHash = SHA256(JSON.stringify(block)).toString();
+                if (blockHash === validBlockHash) {
+                    resolve(true);
+                } else {
+                    reject(new Error(`Block # ${height} invalid hash:\n '${blockHash}'<>'${validBlockHash}'`));
+                }
+            }))
+            .catch(err => console.log(err))
+        })
     }
 
     // Validate Blockchain
